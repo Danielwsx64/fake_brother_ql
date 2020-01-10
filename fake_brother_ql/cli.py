@@ -28,8 +28,23 @@ def cli(ctx, *args, **kwargs):
 @click.pass_context
 def discover(ctx):
     """ find connected label printers """
+    backend = ctx.meta['BACKEND']
 
-    if(ctx.meta['BACKEND'] != 'NOPRINTERS'):
+    if(backend == 'ERRORTODISCOVER'):
+        print('Error: could not discover printers')
+        sys.exit(2)
+
+    elif(backend == 'UNKOWNERRORTODISCOVER'):
+        print('some unknown message of error')
+        sys.exit(2)
+
+    elif(backend == 'TWOPRINTERS'):
+        print('INFO:brother_ql.output_helpers:  Found a label printer: file:///dev/usb/lp0 (model: unknown)')
+        print('INFO:brother_ql.output_helpers:  Found a label printer: file:///dev/usb/lp1 (model: unknown)')
+        print('file:///dev/usb/lp0')
+        print('file:///dev/usb/lp1')
+
+    elif(backend != 'NOPRINTERS'):
         print('INFO:brother_ql.output_helpers:  Found a label printer: file:///dev/usb/lp0 (model: unknown)')
         print('file:///dev/usb/lp0')
 
@@ -38,10 +53,12 @@ def discover(ctx):
 def status_cmd(ctx):
     """ return printer status """
 
-    if(ctx.meta['PRINTER'] == '///dev/usb/error_connect'):
-        print('Error: could not connect to printer ' + printer_name)
+    printer = ctx.meta['PRINTER']
+
+    if( printer == '///dev/usb/error_connect'):
+        print('Error: could not connect to printer ' + printer)
         sys.exit(2)
-    elif(ctx.meta['PRINTER'] == '///dev/usb/error_status'):
+    elif( printer == '///dev/usb/error_status'):
         print('Error: could not fetch printer status')
         sys.exit(2)
     else:
@@ -71,15 +88,19 @@ def status_cmd(ctx):
 @click.pass_context
 def print_cmd(ctx, *args, **kwargs):
     """ Print a label of the provided IMAGE. """
+    printer = ctx.meta['PRINTER']
+
     if(not kwargs['rasp']):
         print('fake just implemented for raspberry')
         sys.exit(2)
-    elif(ctx.meta['PRINTER'] == '///dev/usb/error_connect'):
-        print('Error: could not connect to printer ' + printer_name)
+    elif(printer == '///dev/usb/error_connect'):
+        print('Error: could not connect to printer ' + printer)
         sys.exit(2)
-    elif(ctx.meta['PRINTER'] == '///dev/usb/error_status'):
+    elif(printer == '///dev/usb/error_status'):
         print('Error: could not fetch printer status')
         sys.exit(2)
+    elif(printer == "file:///dev/usb/lp0"):
+        print('Job successfully printed')
 
 if __name__ == '__main__':
     cli()
